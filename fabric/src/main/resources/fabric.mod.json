@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "id": "whitelistd",
+  "version": "${version}",
+
+  "name": "whitelistd",
+  "description": "",
+  "authors": [],
+  "contact": {},
+
+  "license": "GNU GPL 3.0",
+  "icon": "icon.png",
+
+  "environment": "*",
+  "entrypoints": {},
+  "depends": {
+    "fabricloader": ">=0.15.3",
+    "minecraft": ">=1.20.1"
+  }
+}
