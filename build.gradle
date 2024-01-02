@@ -1,3 +1,6 @@
+import java.nio.file.Files
+import java.nio.file.StandardCopyOption
+
 plugins {
     id "architectury-plugin" version "3.4-SNAPSHOT"
     id "dev.architectury.loom" version "1.1-SNAPSHOT" apply false
@@ -40,7 +43,7 @@ allprojects {
         // for more information about repositories.
     }
 
-    tasks.withType(JavaCompile) {
+    tasks.withType(JavaCompile).configureEach {
         options.encoding = "UTF-8"
         options.release.set(17)
     }
@@ -48,4 +51,33 @@ allprojects {
     java {
         withSourcesJar()
     }
+}
+
+tasks.register("copyJar") {
+    mustRunAfter(":fabric:build")
+    mustRunAfter(":forge:build")
+    doLast {
+        def root = rootDir.toPath()
+        def publish = root.resolve("build/publish")
+        Files.createDirectories(publish)
+        java.nio.file.Path fabricJar
+        def match = "whitelistd-" + version + ".jar"
+        def fileBaseName = "Whitelistd-" + version + "-"
+        for (def i : Files.list(root.resolve("fabric/build/libs"))) {
+            if (match == i.toFile().name) {
+                Files.copy(i, publish.resolve(fileBaseName + "fabric.jar"), StandardCopyOption.REPLACE_EXISTING)
+                break
+            }
+        }
+        for (def i : Files.list(root.resolve("forge/build/libs"))) {
+            if (match == i.toFile().name) {
+                Files.copy(i, publish.resolve(fileBaseName + "forge.jar"), StandardCopyOption.REPLACE_EXISTING)
+                break
+            }
+        }
+    }
+}
+
+tasks.named("build") {
+    finalizedBy("copyJar")
 }
