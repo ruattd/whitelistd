@@ -11,7 +11,7 @@ loaderVersion="[47,)" #mandatory This is typically bumped every Minecraft versio
 # Review your options at https://choosealicense.com/. All rights reserved is the default copyright stance, and is thus the default here.
 license="GNU GPL 3.0"
 # A URL to refer people to when problems occur with this mod
-issueTrackerURL="https://github.com/RuaTT/whitelistd/issues"
+issueTrackerURL="https://github.com/ruattd/whitelistd/issues"
 # A list of mods - how many allowed here is determined by the individual mod loader
 [[mods]] #mandatory
 # The modid of the mod
@@ -21,7 +21,7 @@ modId="whitelistd" #mandatory
 # see the associated build.gradle script for how to populate this completely automatically during a build
 version="${version}" #mandatory
 # A display name for the mod
-displayName="whitelistd" #mandatory
+displayName="Whitelistd" #mandatory
 # A URL to query for updates for this mod. See the JSON update specification <here>
 #updateJSONURL="http://myurl.me/" #optional
 # A URL for the "homepage" for this mod, displayed in the mod UI
@@ -31,7 +31,7 @@ logoFile="icon.png" #optional
 # A text field displayed in the mod UI
 #credits="Thanks for this example mod goes to Java" #optional
 # A text field displayed in the mod UI
-#authors="Love, Cheese and small house plants" #optional
+authors="ruattd" #optional
 # Display Test controls the display for your mod in the server connection screen
 # MATCH_VERSION means that your mod will cause a red X if the versions on client and server differ. This is the default behaviour and should be what you choose if you have server and client elements to your mod.
 # IGNORE_SERVER_VERSION means that your mod will not cause a red X if it's present on the server but not on the client. This is what you should use if you're a server only mod.
@@ -42,7 +42,8 @@ logoFile="icon.png" #optional
 
 # The description text for the mod (multi line!) (#mandatory)
 description='''
-
+Advanced whitelist tool for modded servers.
+DO NOT USE IT ON CLIENT SIDE!!!
 '''
 # A dependency - use the . to indicate dependency for a specific modid. Dependencies are optional.
 [[dependencies.whitelistd]] #optional
@@ -62,5 +63,11 @@ description='''
    mandatory=true
    # This version range declares a minimum of the current minecraft version up to but not including the next major version
    versionRange="[1.20.1,1.21)"
+   ordering="NONE"
+   side="BOTH"
+[[dependencies.whitelistd]]
+   modId="architectury"
+   mandatory=true
+   versionRange="[9.1.12,)"
    ordering="NONE"
    side="BOTH"

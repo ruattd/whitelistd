@@ -3,18 +3,25 @@
   "id": "whitelistd",
   "version": "${version}",
 
-  "name": "whitelistd",
-  "description": "",
-  "authors": [],
-  "contact": {},
+  "name": "Whitelistd",
+  "description": "Advanced whitelist tool for modded servers",
+  "authors": ["ruattd"],
+  "contact": {
+    "issues": "https://github.com/ruattd/whitelistd/issues"
+  },
 
   "license": "GNU GPL 3.0",
   "icon": "icon.png",
 
   "environment": "*",
-  "entrypoints": {},
+  "entrypoints": {
+    "main": [{
+      "value": "io.github.ruattd.fc.whitelistd.fabric.WhitelistdFabric"
+    }]
+  },
   "depends": {
     "fabricloader": ">=0.15.3",
-    "minecraft": ">=1.20.1"
+    "minecraft": ">=1.20.1",
+    "architectury": ">=9.1.12"
   }
 }
