@@ -9,6 +9,6 @@ import java.util.UUID;
  */
 @Data
 public class PlayerInfo {
-    public @NonNull String name;
-    public UUID uuid;
+    private @NonNull String name;
+    private UUID uuid;
 }

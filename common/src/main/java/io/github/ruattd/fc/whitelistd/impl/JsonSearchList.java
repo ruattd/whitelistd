@@ -53,7 +53,7 @@ public class JsonSearchList implements SearchList {
 
     @Override @NonNull
     public AddItemState addItem(@NonNull PlayerInfo player) {
-        if (data.players_no_uuid.contains(player.name)) {
+        if (data.players_no_uuid.contains(player.getName())) {
             return AddItemState.DUPLICATE;
         } else {
             var name = player.getName();
@@ -111,7 +111,7 @@ public class JsonSearchList implements SearchList {
         String r1 = null;
         boolean r2 = false;
         if (mode != SearchMode.PLAYER_UUID) r2 = data.players_no_uuid.contains(name);
-        if (player.uuid != null) r1 = data.players.get(uuid);
+        if (uuid != null) r1 = data.players.get(uuid);
         boolean found = false;
         switch (mode) {
             case PLAYER_NAME -> {
