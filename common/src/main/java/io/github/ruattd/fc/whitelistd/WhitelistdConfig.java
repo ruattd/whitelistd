@@ -10,9 +10,8 @@ public class WhitelistdConfig {
     /**
      * 禁用客户端检测, 该检测在模组初始化时执行,
      * 若为客户端则自动禁用部分功能以保证玩家可以正常加入单人游戏.
-     * @see Whitelistd#init()
      */
-    public final boolean disableClientCheck = false;
+    private final boolean disableClientCheck = false;
 
     /**
      * 搜索列表模式, 用于指定搜索列表存储和查询的依照物.
@@ -21,7 +20,15 @@ public class WhitelistdConfig {
      * 目前支持: PLAYER_NAME, PLAYER_UUID, PLAYER_NAME_OR_UUID
      * @see SearchMode
      */
-    public final SearchMode searchMode = SearchMode.PLAYER_NAME_OR_UUID; //TODO
+    private final SearchMode searchMode = SearchMode.PLAYER_NAME_OR_UUID;
+
+    /**
+     * 验证玩家名称时是否大小写敏感.
+     * <p>
+     * 警告: 该设置项为 false 时存储的名称均为纯小写,
+     * 改为 true 后可能会导致部分玩家白名单失效, 请酌情更改此项.
+     */
+    private final boolean playerNameCaseSensitive = true;
 
     /**
      * 存储模式, 用于指定搜索列表的具体实现.
@@ -29,13 +36,13 @@ public class WhitelistdConfig {
      * 目前支持: JSON, HTTP
      * @see StorageMode
      */
-    public final StorageMode storageMode = StorageMode.JSON; //TODO
+    private final StorageMode storageMode = StorageMode.JSON;
 
     /**
      * 特定存储模式要求的参数
      * @see StorageMode
      */
-    public final String[] storageArgs = {"whitelist.json"};
+    private final String[] storageArgs = {"whitelist.json"};
 
     /**
      * 启用 Record 功能.
@@ -47,5 +54,5 @@ public class WhitelistdConfig {
      * 仅在搜索列表模式为 PLAYER_NAME_OR_UUID 时可以达到期望效果,
      * 否则实际效果将会因验证方式特点而有所区别.
      */
-    public final boolean enableRecord = true; //TODO
+    private final boolean enableRecord = true; //TODO
 }

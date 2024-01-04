@@ -1,23 +1,27 @@
 package io.github.ruattd.fc.whitelistd;
 
+import lombok.Getter;
+
 /**
  * 存储搜索列表数据的方式
  */
+@Getter
 public enum StorageMode {
     /**
      * 使用 JSON 文件存储数据, 此方法是最简单且最便于迁移的, 但是性能最差.
+     * 由于使用 JSON 存储, 需要在服务器内存中临时保存所有信息, 且会大量读写单个文件, 故不适用于大型服务器.
      * <p>
      * [参数] (1)<br/>
      * JSON 文件位置 (相对于 config 目录)
      */
-    JSON,
+    JSON(1),
 
     /**
      * 使用 MySQL 存储数据, 此方法性能较好, 但依赖 MySQL 环境.
      * <p>
      * [参数] (?)<br/>
      */
-    MYSQL,
+    MYSQL(0),
 
     /**
      * 使用 MongoDB 存储数据, 此方法性能较好, 但依赖 MongoDB 环境,
@@ -26,7 +30,7 @@ public enum StorageMode {
      * [参数] (3)<br/>
      * 可访问的 MongoDB Connection URI, 数据库名, 数据集名
      */
-    MONGODB,
+    MONGODB(3),
 
     /**
      * 使用 HTTP API 存储数据, 此方法适用于模块化部署, 需要提供一个专用于搜索列表存储的 HTTP API.
@@ -39,5 +43,13 @@ public enum StorageMode {
      * 添加/移除 API 将接受 POST 请求, 不需要返回任何内容 (即使有内容也会被忽略),
      * 使用 HTTP 状态码来表示成功/失败即可.
      */
-    HTTP,
+    HTTP(3),
+
+    ;
+
+    private final int argNumber;
+
+    StorageMode(int argNumber) {
+        this.argNumber = argNumber;
+    }
 }
