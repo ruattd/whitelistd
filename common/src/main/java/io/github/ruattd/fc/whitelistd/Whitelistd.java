@@ -66,7 +66,7 @@ public final class Whitelistd {
 	@NonNull
 	private final Path configFile;
 
-	private void writeConfigFile(Gson gson) throws IOException {
+	public void writeConfigFile(@NonNull Gson gson) throws IOException {
 		var writer = new JsonWriter(Files.newBufferedWriter(configFile));
 		writer.setIndent("  ");
 		gson.toJson(config, WhitelistdConfig.class, writer);
