@@ -25,8 +25,8 @@ public class WhitelistdConfig {
     /**
      * 验证玩家名称时是否大小写敏感.
      * <p>
-     * 警告: 该设置项为 false 时存储的名称均为纯小写,
-     * 改为 true 后可能会导致部分玩家白名单失效, 请酌情更改此项.
+     * 警告: 该设置项为 false 时存储和验证时使用的名称均为纯小写,
+     * 更改后可能会导致部分玩家白名单失效, 请酌情更改此项.
      */
     private final boolean playerNameCaseSensitive = true;
 
