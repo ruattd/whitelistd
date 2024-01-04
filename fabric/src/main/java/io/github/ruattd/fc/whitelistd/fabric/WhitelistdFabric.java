@@ -6,6 +6,6 @@ import net.fabricmc.api.ModInitializer;
 public class WhitelistdFabric implements ModInitializer {
     @Override
     public void onInitialize() {
-        new Whitelistd();
+        Whitelistd.init();
     }
 }

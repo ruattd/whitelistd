@@ -2,11 +2,10 @@ package io.github.ruattd.fc.whitelistd;
 
 import com.google.gson.Gson;
 import com.google.gson.stream.JsonWriter;
-import dev.architectury.event.events.client.ClientLifecycleEvent;
-import dev.architectury.event.events.client.ClientPlayerEvent;
 import dev.architectury.event.events.common.PlayerEvent;
 import dev.architectury.platform.Platform;
 import dev.architectury.utils.Env;
+import lombok.Getter;
 import lombok.NonNull;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
@@ -18,22 +17,21 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Whitelistd {
 	/**
-	 * Mod ID (whitelistd)
+	 * 模组 ID (whitelistd)
 	 */
 	public static final String MOD_ID = "whitelistd";
 
 	/**
-	 * Config object for global mod
+	 * 全局配置对象
 	 */
-	@NonNull
-	public final WhitelistdConfig modConfig;
+	@NonNull @Getter
+	private final WhitelistdConfig modConfig;
 
+	/**
+	 * 本类单例，用于访问部分全局对象，一般不会获取到 {@code null}
+	 */
+	@Getter
 	private static Whitelistd instance;
-
-	@NonNull
-	public static Whitelistd instance() {
-		return instance;
-	}
 
 	@NonNull
 	private final Path configFile;
@@ -45,8 +43,7 @@ public class Whitelistd {
 		writer.close();
 	}
 
-	public Whitelistd() {
-		if (instance != null) throw new RuntimeException("Only one main instance can be created");
+	private Whitelistd() {
 		var configDir = Platform.getConfigFolder().resolve("Whitelistd");
 		try {
 			Files.createDirectories(configDir);
@@ -67,13 +64,16 @@ public class Whitelistd {
 			throw new RuntimeException("Failed to read/write config file", e);
 		}
 		instance = this;
-		init();
 	}
 
-	private void init() {
-		//TODO load config
-		if ((!modConfig.bypassClientCheck) && (Platform.getEnvironment() == Env.CLIENT)) {
-			var showWarning = new AtomicBoolean(true);
+	/**
+	 * 初始化方法，<font color="red">不要调用它</font>
+	 */
+	public static void init() {
+		if (instance != null) throw new RuntimeException("Main instance can only be initialized once");
+		instance = new Whitelistd();
+		if ((!getInstance().modConfig.bypassClientCheck) && (Platform.getEnvironment() == Env.CLIENT)) {
+			final var showWarning = new AtomicBoolean(true);
 			PlayerEvent.PLAYER_JOIN.register(player -> {
 				if (showWarning.get()) {
 					player.sendSystemMessage(Component.empty()

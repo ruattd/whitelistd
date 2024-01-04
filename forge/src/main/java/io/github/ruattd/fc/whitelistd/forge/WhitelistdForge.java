@@ -10,6 +10,6 @@ public class WhitelistdForge {
     public WhitelistdForge() {
 		// Submit our event bus to let architectury register our content on the right time
         EventBuses.registerModEventBus(Whitelistd.MOD_ID, FMLJavaModLoadingContext.get().getModEventBus());
-        new Whitelistd();
+        Whitelistd.init();
     }
 }
