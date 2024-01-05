@@ -6,7 +6,7 @@ public interface SearchList {
     /**
      * 搜索列表的初始化回调方法，将在插件加载时调用
      * @param mode 搜索模式，参考 {@link SearchMode}
-     * @param playerNameCaseSensitive 维护列表时是否允许重名：值为 {@code true} 则不允许重名
+     * @param playerNameCaseSensitive 玩家名称大小写是否敏感，一般不需要关心
      */
     void init(@NonNull SearchMode mode, boolean playerNameCaseSensitive, @NonNull String[] args);
 
@@ -71,7 +71,7 @@ public interface SearchList {
     /**
      * 查询结果
      * @param exist 玩家是否存在于搜索列表中: {@code true} 为存在
-     * @param playerName 搜索列表中存储的名字
+     * @param playerStored 搜索列表中存储的玩家信息
      */
-    record QueryResult(boolean exist, String playerName) {}
+    record QueryResult(boolean exist, PlayerInfo playerStored) {}
 }

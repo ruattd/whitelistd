@@ -17,13 +17,12 @@ public final class WhitelistHelper {
         var searchList = instance.getSearchList();
         var mode = config.getSearchMode();
         if (mode == SearchMode.PLAYER_UUID && player.getUuid() == null) {
-            return new SearchList.QueryResult(false, player.getName());
+            return new SearchList.QueryResult(false, player);
         }
         var result = searchList.query(player);
         if ((!result.exist()) || config.isEnableRecord()) {
             // Record 实现
-            var name = player.getName();
-            var nameRecord = name + ".record";
+            var nameRecord = player.getName() + ".record";
             var playerRecord = new PlayerInfo(nameRecord);
             var resultRecord = searchList.query(playerRecord);
             if (resultRecord.exist()) {
@@ -39,7 +38,7 @@ public final class WhitelistHelper {
                         MessageHelper.sendSystemMessage(Component.empty().withStyle(ChatFormatting.GOLD)
                                 .append("You need to remove '" + nameRecord + "' manually or it may cause unexpected problems"));
                     }
-                    return new SearchList.QueryResult(true, name);
+                    return new SearchList.QueryResult(true, player);
                 }
             }
         }

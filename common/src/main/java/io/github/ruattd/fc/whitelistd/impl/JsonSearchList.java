@@ -104,6 +104,7 @@ public class JsonSearchList implements SearchList {
         return RemoveItemState.SUCCESSFUL;
     }
 
+    //TODO 修复逻辑问题: 搜索玩家名称时应包含 UUID 组中的名称
     @Override @NonNull
     public QueryResult query(@NonNull PlayerInfo player) {
         var name = player.getName();
@@ -137,7 +138,7 @@ public class JsonSearchList implements SearchList {
                 }
             }
         }
-        return new QueryResult(found, name);
+        return new QueryResult(found, new PlayerInfo(name, uuid));
     }
 
     @Override @NonNull
