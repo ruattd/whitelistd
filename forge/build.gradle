@@ -1,6 +1,7 @@
 plugins {
     id "com.github.johnrengelman.shadow" version "8.1.1"
 }
+
 architectury {
     platformSetupLoomIde()
     forge()
@@ -21,6 +22,9 @@ dependencies {
 
     common(project(path: ":common", configuration: "namedElements")) { transitive false }
     shadowCommon(project(path: ":common", configuration: "transformProductionForge")) { transitive = false }
+
+    // External libraries
+    include "org.apache.commons:commons-collections4:4.4"
 }
 
 processResources {
