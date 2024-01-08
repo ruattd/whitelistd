@@ -1,11 +1,12 @@
 package io.github.ruattd.fc.whitelistd;
 
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
 /**
  * 存储搜索列表数据的方式
  */
-@Getter
+@Getter @RequiredArgsConstructor
 public enum StorageMode {
     /**
      * 使用 JSON 文件存储数据, 此方法是最简单且最便于迁移的, 但是性能最差.
@@ -13,6 +14,10 @@ public enum StorageMode {
      * <p>
      * [参数] (1)<br/>
      * JSON 文件位置 (相对于 config 目录)
+     * <p>
+     * [可重复性]<br/>
+     * 不支持重复名称<br/>
+     * 不支持重复 UUID
      */
     JSON(1),
 
@@ -48,8 +53,4 @@ public enum StorageMode {
     ;
 
     private final int argNumber;
-
-    StorageMode(int argNumber) {
-        this.argNumber = argNumber;
-    }
 }

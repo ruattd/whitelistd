@@ -10,6 +10,7 @@ dependencies {
     modApi "dev.architectury:architectury:${rootProject.architectury_version}"
     // Normal implementations
     implementation "com.google.code.gson:gson:2.10.1"
+    implementation "org.apache.commons:commons-collections4:4.4"
 }
 
 architectury {

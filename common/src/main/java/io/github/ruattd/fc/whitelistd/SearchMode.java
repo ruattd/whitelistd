@@ -5,17 +5,17 @@ package io.github.ruattd.fc.whitelistd;
  */
 public enum SearchMode {
     /**
-     * 依据名称进行搜索，此时玩家名称是不可重复的
+     * 依据名称进行搜索
      */
     PLAYER_NAME,
 
     /**
-     * 依据 UUID 进行搜索，此时玩家名称是可重复的
+     * 依据 UUID 进行搜索
      */
     PLAYER_UUID,
 
     /**
-     * 依据名称或 UUID 进行搜索，此时玩家名称是不可重复的，若查询时提供了 UUID 则会优先使用 UUID
+     * 依据名称或 UUID 进行搜索，若查询时提供了 UUID 则会优先使用 UUID
      */
     PLAYER_NAME_OR_UUID,
 }
