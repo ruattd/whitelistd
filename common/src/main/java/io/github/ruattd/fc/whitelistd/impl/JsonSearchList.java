@@ -33,7 +33,7 @@ public class JsonSearchList implements SearchList {
     }
 
     private void writeEmpty() throws IOException {
-        Files.writeString(jsonFilePath, "");
+        Files.writeString(jsonFilePath, "[]");
     }
 
     @Override
