@@ -31,6 +31,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Predicate;
 
 public final class Whitelistd {
     /**
@@ -178,8 +179,9 @@ public final class Whitelistd {
                 return builder.buildFuture();
             };
             var string = StringArgumentType.string();
+            Predicate<CommandSourceStack> require = source -> source.hasPermission(config.getPermissionLevel());
             var whitelistd = dispatcher.register(literal("whitelistd")
-                    .requires(source -> source.hasPermission(instance.getConfig().getPermissionLevel()))
+                    .requires(require)
                     .then(literal("add")
                             .then(argument("name", string)
                                     .suggests(nameSuggest)
@@ -226,7 +228,33 @@ public final class Whitelistd {
                             })
                     )
             );
-            dispatcher.register(literal("wld").redirect(whitelistd));
+            dispatcher.register(literal("wld").requires(require).redirect(whitelistd));
+            if (config.isEnableRecord()) {
+                dispatcher.register(literal("record").requires(require)
+                        .then(argument("name", string)
+                                .executes(context -> {
+                                    var name = context.getArgument("name", String.class);
+                                    if (name != null) {
+                                        var searchList = instance.getSearchList();
+                                        var result = searchList.query(new PlayerInfo(name));
+                                        var source = context.getSource();
+                                        if (result.exist()) {
+                                            source.sendFailure(Component.empty().append("Duplicated name"));
+                                        } else {
+                                            var state = searchList.addItem(new PlayerInfo(name + ".record"));
+                                            if (state == SearchList.AddItemState.SUCCESSFUL) {
+                                                source.sendSystemMessage(Component.empty().append("Successfully recorded"));
+                                                MessageHelper.sendLogI(source.getTextName() + " recorded " + name);
+                                            } else {
+                                                source.sendFailure(Component.empty().append("Failed: " + state));
+                                            }
+                                        }
+                                    }
+                                    return Command.SINGLE_SUCCESS;
+                                })
+                        )
+                );
+            }
         });
         // 客户端检测逻辑
         if ((!config.isDisableClientCheck()) && (Platform.getEnvironment() == Env.CLIENT)) {

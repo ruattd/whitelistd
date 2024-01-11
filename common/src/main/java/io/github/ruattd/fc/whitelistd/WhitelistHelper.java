@@ -18,6 +18,7 @@ public final class WhitelistHelper {
         var config = instance.getConfig();
         var searchList = instance.getSearchList();
         var mode = config.getSearchMode();
+        var name = player.getName();
         var uuid = player.getUuid();
         if (mode == SearchMode.PLAYER_UUID && uuid == null) {
             return SearchList.emptyResult(player);
@@ -25,7 +26,7 @@ public final class WhitelistHelper {
         var result = searchList.query(player);
         if ((!result.exist()) && config.isEnableRecord() && uuid != null) {
             // Record 实现
-            var nameRecord = player.getName() + ".record";
+            var nameRecord = name + ".record";
             var playerRecord = new PlayerInfo(nameRecord);
             var resultRecord = searchList.query(playerRecord);
             if (resultRecord.exist()) {
@@ -33,6 +34,7 @@ public final class WhitelistHelper {
                 if (addState != SearchList.AddItemState.SUCCESSFUL) {
                     MessageHelper.sendLogE("Record add item failed: " + addState);
                 } else {
+                    MessageHelper.sendLogI("Record hit: " + name);
                     var removeState = searchList.removeItem(playerRecord);
                     if (removeState != SearchList.RemoveItemState.SUCCESSFUL) {
                         MessageHelper.sendLogE("Record remove item failed: " + removeState);
