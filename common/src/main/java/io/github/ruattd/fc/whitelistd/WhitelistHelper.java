@@ -1,8 +1,6 @@
 package io.github.ruattd.fc.whitelistd;
 
 import lombok.NonNull;
-import net.minecraft.ChatFormatting;
-import net.minecraft.network.chat.Component;
 
 /**
  * 白名单工具类, 此类中绝大多数方法均需要在 {@link Whitelistd#isReady()} 为 {@code true} 后才可以调用

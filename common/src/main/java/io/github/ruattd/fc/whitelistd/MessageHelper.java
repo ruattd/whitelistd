@@ -32,4 +32,8 @@ public class MessageHelper {
     public static void sendLogE(@NonNull String message) {
         Whitelistd.logger.error(message);
     }
+
+    public static void sendLogE(@NonNull String message, @NonNull Throwable throwable) {
+        Whitelistd.logger.error(message, throwable);
+    }
 }
