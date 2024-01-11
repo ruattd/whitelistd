@@ -23,7 +23,7 @@ public abstract class MixinPlayerList {
         var name = profile.getName();
         var uuid = profile.getId();
         var profileString = name + '{' + uuid + '}';
-        MessageHelper.sendSystemMessage(Component.empty().append("Whitelist request: " + profileString));
+        MessageHelper.sendLogI("Whitelist request: " + profileString);
         String message;
         boolean returnValue;
         if (instance.isReady()) {
@@ -42,7 +42,7 @@ public abstract class MixinPlayerList {
                     message = s + ' ' + name;
                 }
             }
-            MessageHelper.sendSystemMessage(Component.empty().append(message));
+            MessageHelper.sendLogI(message);
             returnable.setReturnValue(returnValue);
         }
     }

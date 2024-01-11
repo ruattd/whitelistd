@@ -32,15 +32,12 @@ public final class WhitelistHelper {
             if (resultRecord.exist()) {
                 var addState = searchList.addItem(player);
                 if (addState != SearchList.AddItemState.SUCCESSFUL) {
-                    MessageHelper.sendSystemMessage(Component.empty().withStyle(ChatFormatting.RED)
-                            .append("Record add item failed: " + addState));
+                    MessageHelper.sendLogE("Record add item failed: " + addState);
                 } else {
                     var removeState = searchList.removeItem(playerRecord);
                     if (removeState != SearchList.RemoveItemState.SUCCESSFUL) {
-                        MessageHelper.sendSystemMessage(Component.empty().withStyle(ChatFormatting.RED)
-                                .append("Record remove item failed: " + removeState));
-                        MessageHelper.sendSystemMessage(Component.empty().withStyle(ChatFormatting.GOLD)
-                                .append("You need to remove '" + nameRecord + "' manually or it may cause unexpected problems"));
+                        MessageHelper.sendLogE("Record remove item failed: " + removeState);
+                        MessageHelper.sendLogE("You need to remove '" + nameRecord + "' manually or it may cause unexpected problems");
                     }
                     return new SearchList.QueryResult(true, player);
                 }

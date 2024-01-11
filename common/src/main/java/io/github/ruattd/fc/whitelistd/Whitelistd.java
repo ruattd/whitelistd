@@ -15,6 +15,8 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -22,6 +24,11 @@ import java.nio.file.Path;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public final class Whitelistd {
+    /**
+     * 日志
+     */
+    public static final Logger logger = LoggerFactory.getLogger("Whitelistd");
+
     /**
      * 模组 ID (whitelistd)
      */
@@ -127,13 +134,12 @@ public final class Whitelistd {
         LifecycleEvent.SERVER_LEVEL_LOAD.register(level -> instance.level = level);
         LifecycleEvent.SERVER_BEFORE_START.register(server -> instance.server = server);
         LifecycleEvent.SERVER_STARTING.register(server -> {
-            MessageHelper.sendSystemMessage(Component.empty().append("Start loading whitelist..."));
+            MessageHelper.sendLogI("Start loading whitelist...");
             var mode = config.getStorageMode();
-            MessageHelper.sendSystemMessage(Component.empty().append("Current storage mode: " + mode));
+            MessageHelper.sendLogI("Current storage mode: " + mode);
             var args = config.getStorageArgs();
             if (args.length != mode.getArgNumber()) {
-                MessageHelper.sendSystemMessage(Component.empty().withStyle(ChatFormatting.GOLD)
-                        .append("Invalid storage args length, this may cause problems."));
+                MessageHelper.sendLogW("Invalid storage args length, this may cause problems.");
             }
             switch (mode) {
                 case JSON -> instance.searchList = new JsonSearchList();
@@ -142,7 +148,7 @@ public final class Whitelistd {
             }
             instance.searchList.init(config.getSearchMode(), config.isPlayerNameCaseSensitive(), args);
             instance.ready = true;
-            MessageHelper.sendSystemMessage(Component.empty().append("Finished loading whitelist"));
+            MessageHelper.sendLogI("Finished loading whitelist");
         });
         // 客户端检测逻辑
         if ((!config.isDisableClientCheck()) && (Platform.getEnvironment() == Env.CLIENT)) {
