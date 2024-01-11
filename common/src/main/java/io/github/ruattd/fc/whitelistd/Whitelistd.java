@@ -10,6 +10,7 @@ import io.github.ruattd.fc.whitelistd.impl.HttpSearchList;
 import io.github.ruattd.fc.whitelistd.impl.JsonSearchList;
 import lombok.Getter;
 import lombok.NonNull;
+import lombok.Setter;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
@@ -25,6 +26,20 @@ public final class Whitelistd {
      * 模组 ID (whitelistd)
      */
     public static final String MOD_ID = "whitelistd";
+
+    /**
+     * 模组全部组件是否加载完成, {@code true} 表示已加载完成, 准备接受并验证玩家
+     */
+    @Getter
+    private boolean ready = false;
+
+    /**
+     * 是否无视白名单允许任何人加入
+     * <p>
+     * 此配置项仅供临时使用, 请勿随意修改
+     */
+    @Getter @Setter
+    private boolean allowAll = false;
 
     /**
      * 模组全局配置
@@ -112,12 +127,12 @@ public final class Whitelistd {
         LifecycleEvent.SERVER_LEVEL_LOAD.register(level -> instance.level = level);
         LifecycleEvent.SERVER_BEFORE_START.register(server -> instance.server = server);
         LifecycleEvent.SERVER_STARTING.register(server -> {
-            MessageHelper.sendSystemMessage(server, Component.empty().append("Start loading whitelist..."));
+            MessageHelper.sendSystemMessage(Component.empty().append("Start loading whitelist..."));
             var mode = config.getStorageMode();
-            MessageHelper.sendSystemMessage(server, Component.empty().append("Current storage mode: " + mode));
+            MessageHelper.sendSystemMessage(Component.empty().append("Current storage mode: " + mode));
             var args = config.getStorageArgs();
             if (args.length != mode.getArgNumber()) {
-                MessageHelper.sendSystemMessage(server, Component.empty().withStyle(ChatFormatting.GOLD)
+                MessageHelper.sendSystemMessage(Component.empty().withStyle(ChatFormatting.GOLD)
                         .append("Invalid storage args length, this may cause problems."));
             }
             switch (mode) {
@@ -126,22 +141,23 @@ public final class Whitelistd {
                 default -> throw new UnsupportedOperationException("Storage mode not implemented");
             }
             instance.searchList.init(config.getSearchMode(), config.isPlayerNameCaseSensitive(), args);
+            instance.ready = true;
+            MessageHelper.sendSystemMessage(Component.empty().append("Finished loading whitelist"));
         });
         // 客户端检测逻辑
         if ((!config.isDisableClientCheck()) && (Platform.getEnvironment() == Env.CLIENT)) {
+            instance.setAllowAll(true);
             final var showWarning = new AtomicBoolean(true);
             PlayerEvent.PLAYER_JOIN.register(player -> {
                 if (showWarning.get()) {
                     MessageHelper.sendSystemMessage(player, Component.empty().withStyle(ChatFormatting.RESET)
                             .append("This mod is only for server, please do NOT install it for your Minecraft client."));
                     MessageHelper.sendSystemMessage(player, Component.empty().withStyle(ChatFormatting.GOLD)
-                            .append("Some features have been automatically disabled, or you will not be able to join the single player world. " +
+                            .append("Allow-all mode have been automatically enabled, or you will not be able to join the single player world. " +
                                     "If you believe it doesn't matter you can set 'disableClientCheck' to true in config.json"));
                     showWarning.set(false);
                 }
             });
-        } else {
-            //TODO hook player join
         }
     }
 }

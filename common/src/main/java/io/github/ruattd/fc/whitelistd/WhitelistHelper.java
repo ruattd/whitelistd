@@ -4,6 +4,9 @@ import lombok.NonNull;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 
+/**
+ * 白名单工具类, 此类中绝大多数方法均需要在 {@link Whitelistd#isReady()} 为 {@code true} 后才可以调用
+ */
 public final class WhitelistHelper {
     /**
      * 实现了 Record 功能的搜索列表查询静态方法
@@ -13,6 +16,7 @@ public final class WhitelistHelper {
     @NonNull
     public static SearchList.QueryResult query(PlayerInfo player) {
         var instance = Whitelistd.getInstance();
+        if (!instance.isReady()) return SearchList.emptyResult(player); // 检查加载状态
         var config = instance.getConfig();
         var searchList = instance.getSearchList();
         var mode = config.getSearchMode();

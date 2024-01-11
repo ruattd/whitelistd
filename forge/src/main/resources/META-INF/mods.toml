@@ -69,5 +69,5 @@ DO NOT USE IT ON CLIENT SIDE!!!
    modId="architectury"
    mandatory=true
    versionRange="[9.1.12,)"
-   ordering="NONE"
+   ordering="AFTER"
    side="BOTH"

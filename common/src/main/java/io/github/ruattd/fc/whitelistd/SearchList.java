@@ -74,4 +74,8 @@ public interface SearchList {
      * @param playerStored 搜索列表中存储的玩家信息
      */
     record QueryResult(boolean exist, PlayerInfo playerStored) {}
+
+    static QueryResult emptyResult(PlayerInfo player) {
+        return new QueryResult(false, player);
+    }
 }
