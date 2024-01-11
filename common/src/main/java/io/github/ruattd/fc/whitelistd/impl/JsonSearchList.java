@@ -175,10 +175,13 @@ public class JsonSearchList implements SearchList {
                     }
                 }
                 var r = find_by_name(name);
-                if (r == ZERO_UUID) {
+                if (r != null) {
                     found = true;
-                } else if (r != null) {
-                    uuid = r;
+                    if (r == ZERO_UUID) {
+                        uuid = null;
+                    } else {
+                        uuid = r;
+                    }
                 }
             }
         }
