@@ -2,6 +2,11 @@ package io.github.ruattd.fc.whitelistd;
 
 import com.google.gson.Gson;
 import com.google.gson.stream.JsonWriter;
+import com.mojang.brigadier.Command;
+import com.mojang.brigadier.arguments.StringArgumentType;
+import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.suggestion.SuggestionProvider;
+import dev.architectury.event.events.common.CommandRegistrationEvent;
 import dev.architectury.event.events.common.LifecycleEvent;
 import dev.architectury.event.events.common.PlayerEvent;
 import dev.architectury.platform.Platform;
@@ -12,6 +17,9 @@ import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
 import net.minecraft.ChatFormatting;
+import static net.minecraft.commands.Commands.*;
+
+import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -21,6 +29,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public final class Whitelistd {
@@ -150,6 +159,60 @@ public final class Whitelistd {
             instance.ready = true;
             MessageHelper.sendLogI("Finished loading whitelist");
         });
+        // 注册指令
+        CommandRegistrationEvent.EVENT.register((dispatcher, registry, selection) -> {
+            SuggestionProvider<CommandSourceStack> nameSuggest = (context, builder) -> {
+                var names = instance.getServer().getPlayerList().getPlayerNamesArray();
+                for (var name : names) {
+                    builder.suggest(name);
+                }
+                return builder.buildFuture();
+            };
+            SuggestionProvider<CommandSourceStack> uuidSuggest = (context, builder) -> {
+                var playerList = instance.getServer().getPlayerList();
+                var name = context.getArgument("name", String.class);
+                if (name != null) {
+                    var player = playerList.getPlayerByName(name);
+                    if (player != null) builder.suggest(player.getStringUUID());
+                }
+                return builder.buildFuture();
+            };
+            var string = StringArgumentType.string();
+            var whitelistd = dispatcher.register(literal("whitelistd")
+                    .requires(source -> source.hasPermission(instance.getConfig().getPermissionLevel()))
+                    .then(literal("add")
+                            .then(argument("name", string)
+                                    .suggests(nameSuggest)
+                                    .executes(context -> commandExecute(1, false, context))
+                                    .then(argument("uuid", string)
+                                            .suggests(uuidSuggest)
+                                            .executes(context -> commandExecute(1, true, context))
+                                    )
+                            )
+                    )
+                    .then(literal("remove")
+                            .then(argument("name", string)
+                                    .suggests(nameSuggest)
+                                    .executes(context -> commandExecute(2, false, context))
+                                    .then(argument("uuid", string)
+                                            .suggests(uuidSuggest)
+                                            .executes(context -> commandExecute(2, true, context))
+                                    )
+                            )
+                    )
+                    .then(literal("query")
+                            .then(argument("name", string)
+                                    .suggests(nameSuggest)
+                                    .executes(context -> commandExecute(3, false, context))
+                                    .then(argument("uuid", string)
+                                            .suggests(uuidSuggest)
+                                            .executes(context -> commandExecute(3, true, context))
+                                    )
+                            )
+                    )
+            );
+            dispatcher.register(literal("wld").redirect(whitelistd));
+        });
         // 客户端检测逻辑
         if ((!config.isDisableClientCheck()) && (Platform.getEnvironment() == Env.CLIENT)) {
             instance.setAllowAll(true);
@@ -165,5 +228,59 @@ public final class Whitelistd {
                 }
             });
         }
+    }
+
+    private static int commandExecute(int operation, boolean existUuid, CommandContext<CommandSourceStack> context) {
+        try {
+            var source = context.getSource();
+            var name = context.getArgument("name", String.class);
+            if (name == null) {
+                source.sendFailure(Component.empty().append("Player name must be specified"));
+            } else {
+                var uuid = existUuid ? context.getArgument("uuid", String.class) : null;
+                try {
+                    var playerInfo = new PlayerInfo(name, (uuid == null) ? null : UUID.fromString(uuid));
+                    var searchList = getInstance().getSearchList();
+                    var profileName = name + '{' + uuid + '}';
+                    switch (operation) {
+                        case 1 -> { // add
+                            var state = searchList.addItem(playerInfo);
+                            if (state == SearchList.AddItemState.SUCCESSFUL) {
+                                source.sendSystemMessage(Component.empty().append("Successfully added"));
+                                MessageHelper.sendLogI(source.getTextName() + " added " + profileName + " to whitelist");
+                            } else {
+                                source.sendFailure(Component.empty().append("Failed: " + state));
+                            }
+                        }
+                        case 2 -> { // remove
+                            var state = searchList.removeItem(playerInfo);
+                            if (state == SearchList.RemoveItemState.SUCCESSFUL) {
+                                source.sendSystemMessage(Component.empty().append("Successfully removed"));
+                                MessageHelper.sendLogI(source.getTextName() + " removed " + profileName + " from whitelist");
+                            } else {
+                                source.sendFailure(Component.empty().append("Failed: " + state));
+                            }
+                        }
+                        case 3 -> { // query
+                            var result = searchList.query(playerInfo);
+                            String message;
+                            if (result.exist()) {
+                                var stored = result.playerStored();
+                                var resultName = stored.getName() + '{' + stored.getUuid() + '}';
+                                message = "Found: " + resultName;
+                            } else {
+                                message = "Not found";
+                            }
+                            source.sendSystemMessage(Component.empty().append(message));
+                        }
+                    }
+                } catch (IllegalArgumentException e) {
+                    source.sendFailure(Component.empty().append("Illegal UUID format"));
+                }
+            }
+        } catch (Exception e) {
+            MessageHelper.sendLogE("An unexpected error occurred while executing command", e);
+        }
+        return Command.SINGLE_SUCCESS;
     }
 }

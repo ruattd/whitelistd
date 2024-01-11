@@ -54,5 +54,10 @@ public class WhitelistdConfig {
      * 仅在搜索列表模式为 PLAYER_NAME_OR_UUID 时可以达到期望效果,
      * 否则实际效果将会因验证方式特点而有所区别.
      */
-    private final boolean enableRecord = true; //TODO
+    private final boolean enableRecord = true;
+
+    /**
+     * 管理白名单需要的权限等级
+     */
+    private final int permissionLevel = 2;
 }
