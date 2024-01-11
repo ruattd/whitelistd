@@ -9,7 +9,7 @@ import net.minecraft.network.chat.Component;
  */
 public final class WhitelistHelper {
     /**
-     * 实现了 Record 功能的搜索列表查询静态方法
+     * 带有 Record 功能的搜索列表查询静态方法
      * @param player 玩家信息
      * @return 查询结果
      */
@@ -20,11 +20,12 @@ public final class WhitelistHelper {
         var config = instance.getConfig();
         var searchList = instance.getSearchList();
         var mode = config.getSearchMode();
-        if (mode == SearchMode.PLAYER_UUID && player.getUuid() == null) {
-            return new SearchList.QueryResult(false, player);
+        var uuid = player.getUuid();
+        if (mode == SearchMode.PLAYER_UUID && uuid == null) {
+            return SearchList.emptyResult(player);
         }
         var result = searchList.query(player);
-        if ((!result.exist()) || config.isEnableRecord()) {
+        if ((!result.exist()) && config.isEnableRecord() && uuid != null) {
             // Record 实现
             var nameRecord = player.getName() + ".record";
             var playerRecord = new PlayerInfo(nameRecord);
