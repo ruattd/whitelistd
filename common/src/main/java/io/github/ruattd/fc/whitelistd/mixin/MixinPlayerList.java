@@ -20,30 +20,32 @@ public abstract class MixinPlayerList {
     @Inject(at = @At("HEAD"), method = "isWhiteListed(Lcom/mojang/authlib/GameProfile;)Z", cancellable = true)
     public void isWhiteListed(GameProfile profile, CallbackInfoReturnable<Boolean> returnable) {
         var instance = Whitelistd.getInstance();
-        var name = profile.getName();
-        var uuid = profile.getId();
-        var profileString = name + '{' + uuid + '}';
-        MessageHelper.sendLogI("Whitelist request: " + profileString);
-        String message;
-        boolean returnValue;
-        if (instance.isReady()) {
-            if (instance.isAllowAll()) {
-                message = "Allowed " + name + " (allow-all mode)";
-                returnValue = true;
-            } else {
-                if (name == null) {
-                    message = "Rejected (name is null)";
-                    returnValue = false;
+        if (instance.isEnabled()) {
+            var name = profile.getName();
+            var uuid = profile.getId();
+            var profileString = name + '{' + uuid + '}';
+            MessageHelper.sendLogI("Whitelist request: " + profileString);
+            String message;
+            boolean returnValue;
+            if (instance.isReady()) {
+                if (instance.isAllowAll()) {
+                    message = "Allowed " + name + " (allow-all mode)";
+                    returnValue = true;
                 } else {
-                    var result = WhitelistHelper.query(new PlayerInfo(name, uuid));
-                    returnValue = result.exist();
-                    String s;
-                    if (returnValue) s = "Allowed"; else s = "Rejected";
-                    message = s + ' ' + name;
+                    if (name == null) {
+                        message = "Rejected (name is null)";
+                        returnValue = false;
+                    } else {
+                        var result = WhitelistHelper.query(new PlayerInfo(name, uuid));
+                        returnValue = result.exist();
+                        String s;
+                        if (returnValue) s = "Allowed"; else s = "Rejected";
+                        message = s + ' ' + name;
+                    }
                 }
+                MessageHelper.sendLogI(message);
+                returnable.setReturnValue(returnValue);
             }
-            MessageHelper.sendLogI(message);
-            returnable.setReturnValue(returnValue);
         }
     }
 }

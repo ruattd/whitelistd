@@ -50,6 +50,12 @@ public final class Whitelistd {
     private boolean ready = false;
 
     /**
+     * 是否启用功能
+     */
+    @Getter @Setter
+    private boolean enabled = true;
+
+    /**
      * 是否无视白名单允许任何人加入
      * <p>
      * 此配置项仅供临时使用, 请勿随意修改
@@ -209,6 +215,24 @@ public final class Whitelistd {
                                             .executes(context -> commandExecute(3, true, context))
                                     )
                             )
+                    )
+                    .then(literal("on")
+                            .executes(context -> {
+                                getInstance().setEnabled(true);
+                                var source = context.getSource();
+                                source.sendSystemMessage(Component.empty().append("Successfully enabled"));
+                                MessageHelper.sendLogI(source.getTextName() + " enabled whitelist");
+                                return Command.SINGLE_SUCCESS;
+                            })
+                    )
+                    .then(literal("off")
+                            .executes(context -> {
+                                getInstance().setEnabled(false);
+                                var source = context.getSource();
+                                source.sendSystemMessage(Component.empty().append("Successfully disabled"));
+                                MessageHelper.sendLogW(source.getTextName() + " disabled whitelist temporarily, vanilla whitelist is taking effect");
+                                return Command.SINGLE_SUCCESS;
+                            })
                     )
             );
             dispatcher.register(literal("wld").redirect(whitelistd));
