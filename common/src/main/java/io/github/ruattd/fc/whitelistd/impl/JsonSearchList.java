@@ -75,22 +75,30 @@ public class JsonSearchList implements SearchList {
     public AddItemState addItem(@NonNull PlayerInfo player) {
         var name = player.getName();
         var uuid = player.getUuid();
-        if (players_no_uuid.contains(name) || players.containsKey(uuid) || players.containsValue(name)) {
-            return AddItemState.DUPLICATE;
-        }
+        var c1n = players_no_uuid.contains(name);
+        var c2u = players.containsKey(uuid);
+        var c2n = players.containsValue(name);
+        boolean a1 = false, d1 = false;
+        boolean a2 = false;
         if (uuid == null) {
-            players_no_uuid.add(name);
+            if (c1n || c2n) return AddItemState.DUPLICATE;
+            players_no_uuid.add(name); a1 = true;
         } else {
-            players.put(uuid, name);
+            if (c2u || c2n) {
+                return AddItemState.DUPLICATE;
+            } else {
+                if (c1n) {
+                    players_no_uuid.remove(name); d1 = true;
+                }
+                players.put(uuid, name); a2 = true;
+            }
         }
         try {
             write();
         } catch (IOException e) {
-            if (uuid == null) {
-                players_no_uuid.remove(name);
-            } else {
-                players.remove(uuid);
-            }
+            if (a1) players_no_uuid.remove(name);
+            if (a2) players.remove(uuid, name);
+            if (d1) players_no_uuid.add(name);
             return AddItemState.IO_ERROR;
         }
         return AddItemState.SUCCESSFUL;
@@ -163,14 +171,14 @@ public class JsonSearchList implements SearchList {
                     if (r != null) {
                         found = true;
                         name = r;
+                        break;
                     }
-                } else {
-                    var r = find_by_name(name);
-                    if (r == ZERO_UUID) {
-                        found = true;
-                    } else if (r != null) {
-                        uuid = r;
-                    }
+                }
+                var r = find_by_name(name);
+                if (r == ZERO_UUID) {
+                    found = true;
+                } else if (r != null) {
+                    uuid = r;
                 }
             }
         }
