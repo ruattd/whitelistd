@@ -168,18 +168,12 @@ public final class Whitelistd {
         // 注册指令
         CommandRegistrationEvent.EVENT.register((dispatcher, registry, selection) -> {
             SuggestionProvider<CommandSourceStack> nameSuggest = (context, builder) -> {
-                var names = instance.getServer().getPlayerList().getPlayerNamesArray();
-                for (var name : names) {
+                var players = instance.getServer().getPlayerList().getPlayers();
+                for (var i : players) {
+                    var name = i.getName().getString();
+                    var uuid = i.getStringUUID();
                     builder.suggest(name);
-                }
-                return builder.buildFuture();
-            };
-            SuggestionProvider<CommandSourceStack> uuidSuggest = (context, builder) -> {
-                var playerList = instance.getServer().getPlayerList();
-                var name = context.getArgument("name", String.class);
-                if (name != null) {
-                    var player = playerList.getPlayerByName(name);
-                    if (player != null) builder.suggest(player.getStringUUID());
+                    builder.suggest(name + ' ' + uuid);
                 }
                 return builder.buildFuture();
             };
@@ -191,7 +185,6 @@ public final class Whitelistd {
                                     .suggests(nameSuggest)
                                     .executes(context -> commandExecute(1, false, context))
                                     .then(argument("uuid", string)
-                                            .suggests(uuidSuggest)
                                             .executes(context -> commandExecute(1, true, context))
                                     )
                             )
@@ -201,7 +194,6 @@ public final class Whitelistd {
                                     .suggests(nameSuggest)
                                     .executes(context -> commandExecute(2, false, context))
                                     .then(argument("uuid", string)
-                                            .suggests(uuidSuggest)
                                             .executes(context -> commandExecute(2, true, context))
                                     )
                             )
@@ -211,7 +203,6 @@ public final class Whitelistd {
                                     .suggests(nameSuggest)
                                     .executes(context -> commandExecute(3, false, context))
                                     .then(argument("uuid", string)
-                                            .suggests(uuidSuggest)
                                             .executes(context -> commandExecute(3, true, context))
                                     )
                             )
