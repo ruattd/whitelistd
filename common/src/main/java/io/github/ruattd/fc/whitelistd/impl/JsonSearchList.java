@@ -100,27 +100,29 @@ public class JsonSearchList implements SearchList {
     public RemoveItemState removeItem(@NonNull PlayerInfo player) {
         var name = player.getName();
         var uuid = player.getUuid();
-        boolean nf1 = !players_no_uuid.remove(name);
-        boolean nf2 = true;
-        boolean nf;
+        boolean f1 = false;
+        boolean f2;
+        boolean f;
         if (uuid == null) {
-            nf = nf1;
+            f1 = players_no_uuid.remove(name);
+            f2 = players.removeValue(name) != null;
+            f = f1 || f2;
         } else {
-            nf2 = players.remove(uuid) == null;
-            nf = nf2 && nf1;
+            f2 = players.remove(uuid) != null;
+            f = f2;
         }
-        if (nf) {
-            return RemoveItemState.NOT_FOUND;
-        } else {
+        if (f) {
             try {
                 write();
             } catch (IOException e) {
-                if (!nf1) players_no_uuid.add(name);
-                if (!nf2) players.put(uuid, name);
+                if (f1) players_no_uuid.add(name);
+                if (f2) players.put(uuid, name);
                 return RemoveItemState.IO_ERROR;
             }
+            return RemoveItemState.SUCCESSFUL;
+        } else {
+            return RemoveItemState.NOT_FOUND;
         }
-        return RemoveItemState.SUCCESSFUL;
     }
 
     private UUID find_by_name(@NonNull String name) {
