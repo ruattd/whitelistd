@@ -8,8 +8,9 @@ Advanced whitelist tool for modded Minecraft server.
 
 Download JAR from:
    - [GitHub Releases](https://github.com/ruattd/whitelistd/releases/latest)
+   - [Modrinth](https://modrinth.com/mod/whitelistd/versions)
 
-Move the JAR file to your `mods` folder.
+Drop the JAR file to your `mods` folder.
 
 Make sure you've added [Architectury API](https://github.com/architectury/architectury-api) (or from [Modrinth](https://modrinth.com/mod/architectury-api)).
 
