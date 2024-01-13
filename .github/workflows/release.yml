@@ -1,0 +1,57 @@
+name: Publish Release
+
+on:
+  release:
+    types: [ published ]
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up JDK
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+      - name: Grant permission for gradlew
+        run: chmod +x gradlew
+      - name: Build with Gradle
+        uses: gradle/gradle-build-action@bd5760595778326ba7f1441bcf7e88b49de61a25 # v2.6.0
+        with:
+          arguments: build
+      - name: Find correct JARs
+        id: findjars
+        run: |
+          jar1="$(find build/publish/ -name "*-fabric.jar" -type f -printf "%f\n")"
+          jar2="$(find build/publish/ -name "*-forge.jar" -type f -printf "%f\n")"
+          echo "jar1=$jar1" >> $GITHUB_OUTPUT
+          echo "jar2=$jar2" >> $GITHUB_OUTPUT
+      - name: Save artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: artifacts
+          path: build/publish/*
+      - name: Upload Fabric version
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: build/publish/${{ steps.findjars.outputs.jar1 }}
+          asset_name: ${{ steps.findjars.outputs.jar1 }}
+          asset_content_type: application/java-archive
+      - name: Upload Forge version
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: build/publish/${{ steps.findjars.outputs.jar2 }}
+          asset_name: ${{ steps.findjars.outputs.jar2 }}
+          asset_content_type: application/java-archive
+      - name: Clean up
+        run: rm -rf ./build ./*/build
