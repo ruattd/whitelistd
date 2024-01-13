@@ -30,5 +30,3 @@ jobs:
         with:
           name: artifacts
           path: build/publish/*
-      - name: Clean up
-        run: rm -rf build

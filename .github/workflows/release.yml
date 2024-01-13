@@ -53,5 +53,3 @@ jobs:
           asset_path: build/publish/${{ steps.findjars.outputs.jar2 }}
           asset_name: ${{ steps.findjars.outputs.jar2 }}
           asset_content_type: application/java-archive
-      - name: Clean up
-        run: rm -rf ./build ./*/build
