@@ -1,6 +1,6 @@
 # Whitelistd
 
-<img src="https://github.com/ruattd/whitelistd/blob/main/common/src/main/resources/icon.png?raw=true" alt="icon" width="150"/>
+<img src="https://github.com/ruattd/whitelistd/blob/main/common/src/main/resources/assets/whitelistd/icon.png?raw=true" alt="icon" width="150"/>
 
 Advanced whitelist tool for modded Minecraft server.
 
