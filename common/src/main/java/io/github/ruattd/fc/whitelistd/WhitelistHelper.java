@@ -1,6 +1,7 @@
 package io.github.ruattd.fc.whitelistd;
 
 import lombok.NonNull;
+import net.minecraft.network.chat.Component;
 
 /**
  * 白名单工具类, 此类中绝大多数方法均需要在 {@link Whitelistd#isReady()} 为 {@code true} 后才可以调用
@@ -32,13 +33,13 @@ public final class WhitelistHelper {
             if (resultRecord.exist()) {
                 var addState = searchList.addItem(player);
                 if (addState != SearchList.AddItemState.SUCCESSFUL) {
-                    MessageHelper.sendLogE("Record add item failed: " + addState);
+                    MessageHelper.sendLogE(Component.translatable("wld.console.record_add_failed", addState.toString()).getString());
                 } else {
-                    MessageHelper.sendLogI("Record hit: " + name);
+                    MessageHelper.sendLogI(Component.translatable("wld.console.record_hit", name).getString());
                     var removeState = searchList.removeItem(playerRecord);
                     if (removeState != SearchList.RemoveItemState.SUCCESSFUL) {
-                        MessageHelper.sendLogE("Record remove item failed: " + removeState);
-                        MessageHelper.sendLogE("You need to remove '" + nameRecord + "' manually or it may cause unexpected problems");
+                        MessageHelper.sendLogE(Component.translatable("wld.console.record_remove_failed", removeState.toString()).getString());
+                        MessageHelper.sendLogE(Component.translatable("wld.console.record_remove_manually_hint", nameRecord).toString());
                     }
                     return new SearchList.QueryResult(true, player);
                 }

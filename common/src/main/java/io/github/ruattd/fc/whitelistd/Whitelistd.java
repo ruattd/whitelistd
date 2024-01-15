@@ -150,12 +150,12 @@ public final class Whitelistd {
         LifecycleEvent.SERVER_LEVEL_LOAD.register(level -> instance.level = level);
         LifecycleEvent.SERVER_BEFORE_START.register(server -> instance.server = server);
         LifecycleEvent.SERVER_STARTING.register(server -> {
-            MessageHelper.sendLogI("Start loading whitelist...");
+            MessageHelper.sendLogI(Component.translatable("wld.log.start_loading").getString());
             var mode = config.getStorageMode();
-            MessageHelper.sendLogI("Current storage mode: " + mode);
+            MessageHelper.sendLogI(Component.translatable("wld.log.storage_mode", mode.toString()).getString());
             var args = config.getStorageArgs();
             if (args.length != mode.getArgNumber()) {
-                MessageHelper.sendLogW("Invalid storage args length, this may cause problems.");
+                MessageHelper.sendLogW(Component.translatable("wld.console.invalid_storage_args_length").getString());
             }
             switch (mode) {
                 case JSON -> instance.searchList = new JsonSearchList();
@@ -164,7 +164,7 @@ public final class Whitelistd {
             }
             instance.searchList.init(config.getSearchMode(), config.isPlayerNameCaseSensitive(), args);
             instance.ready = true;
-            MessageHelper.sendLogI("Finished loading whitelist");
+            MessageHelper.sendLogI(Component.translatable("wld.log.finished_loading").getString());
         });
         // 注册指令
         CommandRegistrationEvent.EVENT.register((dispatcher, registry, selection) -> {
@@ -213,8 +213,8 @@ public final class Whitelistd {
                             .executes(context -> {
                                 getInstance().setEnabled(true);
                                 var source = context.getSource();
-                                source.sendSystemMessage(Component.empty().append("Successfully enabled"));
-                                MessageHelper.sendLogI(source.getTextName() + " enabled whitelist");
+                                source.sendSystemMessage(Component.translatable("wld.status.enable_whitelist"));
+                                MessageHelper.sendLogI(Component.translatable("wld.console.enable_whitelist", source.getTextName()).getString());
                                 return Command.SINGLE_SUCCESS;
                             })
                     )
@@ -222,8 +222,8 @@ public final class Whitelistd {
                             .executes(context -> {
                                 getInstance().setEnabled(false);
                                 var source = context.getSource();
-                                source.sendSystemMessage(Component.empty().append("Successfully disabled"));
-                                MessageHelper.sendLogW(source.getTextName() + " disabled whitelist temporarily, vanilla whitelist is taking effect");
+                                source.sendSystemMessage(Component.translatable("wld.status.disable_whitelist"));
+                                MessageHelper.sendLogW(Component.translatable("wld.console.disable_whitelist", source.getTextName()).getString());
                                 return Command.SINGLE_SUCCESS;
                             })
                     )
@@ -239,14 +239,14 @@ public final class Whitelistd {
                                         var result = searchList.query(new PlayerInfo(name));
                                         var source = context.getSource();
                                         if (result.exist()) {
-                                            source.sendFailure(Component.empty().append("Duplicated name"));
+                                            source.sendFailure(Component.translatable("wld.status.duplicated_name"));
                                         } else {
                                             var state = searchList.addItem(new PlayerInfo(name + ".record"));
                                             if (state == SearchList.AddItemState.SUCCESSFUL) {
                                                 source.sendSystemMessage(Component.empty().append("Successfully recorded"));
-                                                MessageHelper.sendLogI(source.getTextName() + " recorded " + name);
+                                                MessageHelper.sendLogI(Component.translatable("wld.console.add_record", source.getTextName(), name).getString());
                                             } else {
-                                                source.sendFailure(Component.empty().append("Failed: " + state));
+                                                source.sendFailure(Component.translatable("wld.status.failed", state.toString()));
                                             }
                                         }
                                     }
@@ -262,11 +262,8 @@ public final class Whitelistd {
             final var showWarning = new AtomicBoolean(true);
             PlayerEvent.PLAYER_JOIN.register(player -> {
                 if (showWarning.get()) {
-                    MessageHelper.sendSystemMessage(player, Component.empty().withStyle(ChatFormatting.RESET)
-                            .append("This mod is only for server, please do NOT install it for your Minecraft client."));
-                    MessageHelper.sendSystemMessage(player, Component.empty().withStyle(ChatFormatting.GOLD)
-                            .append("Allow-all mode have been automatically enabled, or you will not be able to join the single player world. " +
-                                    "If you believe it doesn't matter you can set 'disableClientCheck' to true in config.json"));
+                    MessageHelper.sendSystemMessage(player, Component.translatable("wld.client.only_for_server").withStyle(ChatFormatting.RESET));
+                    MessageHelper.sendSystemMessage(player, Component.translatable("wld.client.auto_allow_all").withStyle(ChatFormatting.GOLD));
                     showWarning.set(false);
                 }
             });
@@ -277,52 +274,48 @@ public final class Whitelistd {
         try {
             var source = context.getSource();
             var name = context.getArgument("name", String.class);
-            if (name == null) {
-                source.sendFailure(Component.empty().append("Player name must be specified"));
-            } else {
-                var uuid = existUuid ? context.getArgument("uuid", String.class) : null;
-                try {
-                    var playerInfo = new PlayerInfo(name, (uuid == null) ? null : UUID.fromString(uuid));
-                    var searchList = getInstance().getSearchList();
-                    var profileName = name + '{' + uuid + '}';
-                    switch (operation) {
-                        case 1 -> { // add
-                            var state = searchList.addItem(playerInfo);
-                            if (state == SearchList.AddItemState.SUCCESSFUL) {
-                                source.sendSystemMessage(Component.empty().append("Successfully added"));
-                                MessageHelper.sendLogI(source.getTextName() + " added " + profileName + " to whitelist");
-                            } else {
-                                source.sendFailure(Component.empty().append("Failed: " + state));
-                            }
-                        }
-                        case 2 -> { // remove
-                            var state = searchList.removeItem(playerInfo);
-                            if (state == SearchList.RemoveItemState.SUCCESSFUL) {
-                                source.sendSystemMessage(Component.empty().append("Successfully removed"));
-                                MessageHelper.sendLogI(source.getTextName() + " removed " + profileName + " from whitelist");
-                            } else {
-                                source.sendFailure(Component.empty().append("Failed: " + state));
-                            }
-                        }
-                        case 3 -> { // query
-                            var result = searchList.query(playerInfo);
-                            String message;
-                            if (result.exist()) {
-                                var stored = result.playerStored();
-                                var resultName = stored.getName() + '{' + stored.getUuid() + '}';
-                                message = "Found: " + resultName;
-                            } else {
-                                message = "Not found";
-                            }
-                            source.sendSystemMessage(Component.empty().append(message));
+            var uuid = existUuid ? context.getArgument("uuid", String.class) : null;
+            try {
+                var playerInfo = new PlayerInfo(name, (uuid == null) ? null : UUID.fromString(uuid));
+                var searchList = getInstance().getSearchList();
+                var profileName = name + '{' + uuid + '}';
+                switch (operation) {
+                    case 1 -> { // add
+                        var state = searchList.addItem(playerInfo);
+                        if (state == SearchList.AddItemState.SUCCESSFUL) {
+                            source.sendSystemMessage(Component.translatable("wld.status.add_whitelist_item"));
+                            MessageHelper.sendLogI(Component.translatable("wld.console.add_whitelist_item", source.getTextName(), profileName).getString());
+                        } else {
+                            source.sendFailure(Component.translatable("wld.status.failed", state.toString()));
                         }
                     }
-                } catch (IllegalArgumentException e) {
-                    source.sendFailure(Component.empty().append("Illegal UUID format"));
+                    case 2 -> { // remove
+                        var state = searchList.removeItem(playerInfo);
+                        if (state == SearchList.RemoveItemState.SUCCESSFUL) {
+                            source.sendSystemMessage(Component.translatable("wld.status.remove_whitelist_item"));
+                            MessageHelper.sendLogI(Component.translatable("wld.console.remove_whitelist_item", source.getTextName(), profileName).getString());
+                        } else {
+                            source.sendFailure(Component.translatable("wld.status.failed", state.toString()));
+                        }
+                    }
+                    case 3 -> { // query
+                        var result = searchList.query(playerInfo);
+                        Component message;
+                        if (result.exist()) {
+                            var stored = result.playerStored();
+                            var resultName = stored.getName() + '{' + stored.getUuid() + '}';
+                            message = Component.translatable("wld.status.found", resultName);
+                        } else {
+                            message = Component.translatable("wld.status.not_found");
+                        }
+                        source.sendSystemMessage(Component.empty().append(message));
+                    }
                 }
+            } catch (IllegalArgumentException e) {
+                source.sendFailure(Component.translatable("wld.status.illegal_uuid_format"));
             }
         } catch (Exception e) {
-            MessageHelper.sendLogE("An unexpected error occurred while executing command", e);
+            MessageHelper.sendLogE(Component.translatable("wld.console.unexpected_error").getString(), e);
         }
         return Command.SINGLE_SUCCESS;
     }
