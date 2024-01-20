@@ -4,14 +4,13 @@ import com.google.gson.Gson;
 import com.google.gson.stream.JsonWriter;
 import io.github.ruattd.fc.whitelistd.*;
 import lombok.NonNull;
+import org.apache.commons.collections4.MapIterator;
 import org.apache.commons.collections4.bidimap.DualHashBidiMap;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.UUID;
+import java.util.*;
 
 public class JsonSearchList implements SearchList {
     private SearchMode mode;
@@ -201,4 +200,63 @@ public class JsonSearchList implements SearchList {
     }
 
     private record PlayerItem(String name, String uuid) {}
+
+    @Override
+    public int size() {
+        return players.size() + players_no_uuid.size();
+    }
+
+    @Override @NonNull
+    public Iterable<PlayerInfo> getItems() {
+        return () -> new Iterator<>() {
+            private final Iterator<String> players_no_uuid = JsonSearchList.this.players_no_uuid.iterator();
+            private final MapIterator<UUID, String> players = JsonSearchList.this.players.mapIterator();
+
+            private int currentIterator = 0;
+
+            @Override
+            public boolean hasNext() {
+                switch (currentIterator) {
+                    case 0 -> {
+                        var hasNext = players_no_uuid.hasNext();
+                        if (hasNext) {
+                            return true;
+                        } else {
+                            currentIterator = 1;
+                            return hasNext();
+                        }
+                    }
+                    case 1 -> {
+                        return players.hasNext();
+                    }
+                }
+                return false;
+            }
+
+            @Override
+            public PlayerInfo next() {
+                switch (currentIterator) {
+                    case 0 -> {
+                        var next = players_no_uuid.next();
+                        if (next == null) {
+                            currentIterator = 1;
+                            return next();
+                        } else {
+                            return new PlayerInfo(next);
+                        }
+                    }
+                    case 1 -> {
+                        var next = players.next();
+                        if (next == null) {
+                            return null;
+                        } else {
+                            var name = JsonSearchList.this.players.get(next);
+                            return new PlayerInfo(name, next);
+                        }
+                    }
+                }
+                return null;
+            }
+        };
+    }
 }

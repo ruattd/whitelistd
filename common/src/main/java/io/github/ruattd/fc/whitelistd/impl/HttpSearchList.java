@@ -33,4 +33,14 @@ public class HttpSearchList implements SearchList {
         //TODO
         return null;
     }
+
+    @Override
+    public int size() {
+        return 0;
+    }
+
+    @Override @NonNull
+    public Iterable<PlayerInfo> getItems() {
+        return null;
+    }
 }
