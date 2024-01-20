@@ -78,6 +78,17 @@ public class Commands {
                             return Command.SINGLE_SUCCESS;
                         })
                 )
+                .then(literal("list")
+                        .executes(context -> {
+                            var source = context.getSource();
+                            new Thread(() -> {
+                                var searchList = Whitelistd.getInstance().getSearchList();
+                                searchList.getItems().forEach(info -> source.sendSystemMessage(
+                                        Component.literal(info.getName() + '{' + info.getUuid() + '}')));
+                            }, "Whitelistd Listing Thread").start();
+                            return Command.SINGLE_SUCCESS;
+                        })
+                )
         );
         dispatcher.register(literal("wld").requires(require).redirect(whitelistd));
         if (config.isEnableRecord()) {
